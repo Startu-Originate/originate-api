@@ -55,8 +55,9 @@ model User {
   // Relationships
   teamCompany   TeamCompany @relation(fields: [teamCompanyId], references: [id])
   teamCompanyId String
-  Log           Log[]
-  Lead          Lead[]
+
+  Log  Log[]
+  Lead Lead[]
 
   @@map("users")
 }
