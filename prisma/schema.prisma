@@ -9,7 +9,7 @@ datasource db {
 
 // Enums
 enum Role {
-  ADMIN
+  SYSTEM_ADMIN
   TEAM_ADMIN
   TEAM_MEMBER
 }
@@ -20,34 +20,147 @@ enum Gender {
   OTHER
 }
 
-enum UserStatus {
+enum Status {
   ACTIVE
   INACTIVE
 }
 
+enum AcquisitionChannel {
+  OUTBOUND
+  INBOUND
+  META_ADS
+  GOOGLE_ADS
+  NONE
+  FARMER
+}
+
 // Models
 model User {
-  // Identifiers
-  id    String @id @default(cuid())
-  email String @unique
-
-  // Authentication
+  id           String @id @default(cuid())
+  email        String @unique
   passwordHash String
 
-  // Personal Information
+  role   Role   @default(TEAM_MEMBER)
+  status Status @default(ACTIVE)
+
   firstName String
   lastName  String
   dateBirth DateTime?
-  gender    Gender?   @default(MALE)
   picture   String?
+  gender    Gender?   @default(MALE)
 
-  // Role and Status
-  role   Role       @default(TEAM_MEMBER)
-  status UserStatus @default(ACTIVE)
-
-  // Audit Fields
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relationships
+  teamCompany   TeamCompany @relation(fields: [teamCompanyId], references: [id])
+  teamCompanyId String
+  Log           Log[]
+  Lead          Lead[]
+
   @@map("users")
+}
+
+model TeamCompany {
+  id   String @id @default(cuid())
+  name String @unique
+  cnpj String @unique
+
+  status Status @default(ACTIVE)
+
+  state           String?
+  city            String?
+  website         String?
+  linkedIn        String?
+  segment         String?
+  pipedriveApiKey String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  User User[]
+  Log  Log[]
+
+  @@map("team_companies")
+}
+
+model Lead {
+  id    String  @id @default(cuid())
+  email String? @unique
+
+  firstName          String
+  lastName           String
+  notes              String?
+  linkedIn           String?
+  position           String?
+  department         String?
+  phone              String?
+  cellphone          String?
+  origin             String?
+  acquisitionChannel AcquisitionChannel?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationship
+  leadCompany   LeadCompany @relation(fields: [leadCompanyId], references: [id])
+  leadCompanyId String
+
+  responsible   User   @relation(fields: [responsibleId], references: [id])
+  responsibleId String
+
+  Log Log[]
+
+  @@map("leads")
+}
+
+model LeadCompany {
+  id   String  @id @default(cuid())
+  name String  @unique
+  cnpj String? @unique
+
+  state                   String?
+  city                    String?
+  website                 String?
+  linkedIn                String?
+  segment                 String?
+  numberEmployees         Int?
+  organizationPipedriveId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationship
+  Lead Lead[]
+  Log  Log[]
+
+  @@index([name])
+  @@map("lead_companies")
+}
+
+model Log {
+  id String @id @default(cuid())
+
+  action    String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  teamCompany   TeamCompany? @relation(fields: [teamCompanyId], references: [id])
+  teamCompanyId String?
+
+  lead   Lead?   @relation(fields: [leadId], references: [id])
+  leadId String?
+
+  leadCompany   LeadCompany? @relation(fields: [leadCompanyId], references: [id])
+  leadCompanyId String?
+
+  @@index([userId])
+  @@index([teamCompanyId])
+  @@index([leadId])
+  @@index([leadCompanyId])
+  @@map("logs")
 }
