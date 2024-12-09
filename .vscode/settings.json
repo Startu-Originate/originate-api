@@ -1,0 +1,33 @@
+{
+  "[prisma]": {
+    "editor.formatOnSave": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[javascript]": {
+    "editor.formatOnSave": true,
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true,
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "cSpell.words": [
+    "bitnami",
+    "cuid",
+    "datasource",
+    "vercel"
+  ],
+  "explorer.fileNesting.patterns": {
+    "package.json": "eslint*, .eslint*, prettier*, docker*, .prettier*, tsconfig*, vite*, pnpm-*, bun.lockb, nest*, package-lock*, biome*, .npmrc*, .gitignore*, tailwind.config*, postcss.config*, next-*, next.*",
+    ".env": ".env*",
+  },
+}

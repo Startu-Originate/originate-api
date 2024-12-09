@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  postgresql:
+    image: bitnami/postgresql
+    ports:
+      - 5432:5432
+    networks:
+      - sb-network
+    environment:
+      POSTGRESQL_USER: originate-server
+      POSTGRESQL_PASSWORD: originate-server
+      POSTGRESQL_DATABASE: originate-server
+
+networks:
+  sb-network:
+    driver: bridge
