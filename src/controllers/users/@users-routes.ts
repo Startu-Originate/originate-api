@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 
-import { generateUserInvitationTokenController } from './generate-user-invitation-controller'
+import { generateUserInvitationTokenController } from './generate-user-invitation-token-controller'
 import { userSignInController } from './user-sign-in-controller'
 
 export async function appUserRoutes(app: FastifyInstance) {
