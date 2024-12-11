@@ -4,7 +4,7 @@ import { fastifyMultipart } from '@fastify/multipart'
 import fastify from 'fastify'
 import { ZodError } from 'zod'
 
-import { appUserRoutes } from '@/controllers/users/@routes'
+import { appUserRoutes } from '@/controllers/users/@users-routes'
 
 import { corsOptions } from './config/cors-options'
 import { env } from './config/env'
@@ -22,7 +22,7 @@ app.register(fastifyMultipart)
 app.register(appUserRoutes)
 
 // Middleware de tratamento de erros
-// TODO: ver como melhorar esse tratamento e talvez usar new relic ou algo do tipo
+// TODO: melhorar esse tratamento e talvez usar new relic ou algo do tipo
 app.setErrorHandler((error, _, reply) => {
   if (error instanceof ZodError) {
     return reply
