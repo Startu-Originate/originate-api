@@ -2,7 +2,7 @@ import { EmailNotAvailableException } from '@/errors/email-not-available.excepti
 import { UserTeamNotFoundException } from '@/errors/user-team-not-found.exception'
 import type { UsersRepository } from '@/repositories/users-repository'
 import type { UsersTeamsRepository } from '@/repositories/users-teams-repository'
-import { generateInvitationJwt } from '@/utils/user-invitation-jwt'
+import { generateInvitationJwt } from '@/utils/generate-invitation-jwt'
 
 interface GenerateUserInvitationTokenUseCaseRequest {
   userEmail: string
@@ -33,7 +33,6 @@ export class GenerateUserInvitationTokenUseCase {
       throw new UserTeamNotFoundException()
     }
 
-    // Await the JWT generation if it's asynchronous
     const token = await generateInvitationJwt({ userEmail, userTeamId })
 
     return {
