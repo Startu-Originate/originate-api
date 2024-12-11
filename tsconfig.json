@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */
@@ -36,6 +37,7 @@
       "@/factories*": ["./src/factories*"],
       "@/repositories*": ["./src/repositories*"],
       "@/use-cases*": ["./src/use-cases*"],
+      "@/services*": ["./src/services*"],
       "@/utils*": ["./src/utils*"]
     },                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
