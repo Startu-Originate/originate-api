@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
+// ------------ Enums ------------
 enum Role {
   SYSTEM_ADMIN
   TEAM_ADMIN
@@ -20,12 +20,47 @@ enum Gender {
   OTHER
 }
 
-enum Status {
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AccountStatus {
   ACTIVE
   INACTIVE
 }
 
-// Trocar para uma tabela
+enum CadenceStatus {
+  AVAILABLE
+  PAUSED
+}
+
+enum ActionStatus {
+  COMPLETED
+  PENDING
+  OVERDUE
+}
+
+enum ActionType {
+  SEARCH
+  LINKED_IN
+  WHATSAPP
+  CALL
+  EMAIL
+  INSTAGRAM
+}
+
+enum ActivityStatus {
+  PENDING
+  IGNORED
+  COMPLETED
+  OVERDUE
+  PAUSED
+  EXCLUDED
+}
+
+// TODO: Trocar para uma tabela (criar tabela com uma linha para cada empresa, com array para adicionar todos os canais, deixar canais default)
 enum AcquisitionChannel {
   OUTBOUND
   INBOUND
@@ -35,88 +70,137 @@ enum AcquisitionChannel {
   FARMER
 }
 
-// Models
-model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  role         Role      @default(TEAM_MEMBER)
-  status       Status    @default(ACTIVE)
-  firstName    String
-  lastName     String
-  dateBirth    DateTime?
-  picture      String?
-  gender       Gender?   @default(MALE)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+// ------------ Logs ------------
+model Log {
+  id        String   @id @default(cuid())
+  action    String
+  createdAt DateTime @default(now())
 
   // Relationships
-  userTeam   UserTeam @relation(fields: [userTeamId], references: [id])
-  userTeamId String
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?
+  team           Team?         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId         String?
+  lead           Lead?         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId         String?
+  leadCompany    LeadCompany?  @relation(fields: [leadCompanyId], references: [id], onDelete: Cascade)
+  leadCompanyId  String?
+  Cadence        Cadence?      @relation(fields: [cadenceId], references: [id], onDelete: Cascade)
+  cadenceId      String?
+  DayOfCadence   DayOfCadence? @relation(fields: [dayOfCadenceId], references: [id], onDelete: Cascade)
+  dayOfCadenceId String?
+  Action         Action?       @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  actionId       String?
+  Activity       Activity?     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId     String?
 
-  logs  Log[]
-  leads Lead[]
+  @@index([userId])
+  @@index([teamId])
+  @@index([leadId])
+  @@index([leadCompanyId])
+  @@index([dayOfCadenceId])
+  @@index([actionId])
+  @@index([activityId])
+  @@map("logs")
+}
 
+// ------------ Models ------------
+model User {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+
+  role   Role          @default(TEAM_MEMBER)
+  status AccountStatus @default(ACTIVE)
+  gender Gender        @default(MALE)
+
+  firstName String
+  lastName  String
+  dateBirth DateTime?
+  picture   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // -- Relationships
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String
+
+  logs     Log[]
+  leads    Lead[]
+  cadences Cadence[]
+
+  @@index([teamId])
   @@map("users")
 }
 
-model UserTeam {
-  id              String   @id @default(cuid())
-  name            String   @unique
-  cnpj            String   @unique
-  status          Status   @default(ACTIVE)
+model Team {
+  id   String @id @default(cuid())
+  name String @unique
+  cnpj String @unique
+
+  status AccountStatus @default(ACTIVE)
+
   state           String?
   city            String?
   website         String?
   linkedIn        String?
   segment         String?
   pipedriveApiKey String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
 
-  // Relationships
-  users User[]
-  logs  Log[]
-  Lead  Lead[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@map("users_teams")
+  // -- Relationships
+  users    User[]
+  logs     Log[]
+  leads    Lead[]
+  cadences Cadence[]
+
+  @@map("teams")
 }
 
 model Lead {
-  id                 String              @id @default(cuid())
-  email              String?             @unique
-  firstName          String
-  lastName           String
-  notes              String?
-  linkedIn           String?
-  position           String?
-  department         String?
-  phone              String?
-  cellphone          String?
-  origin             String?
+  id    String  @id @default(cuid())
+  email String? @unique
+
   acquisitionChannel AcquisitionChannel?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  priority           Priority            @default(MEDIUM)
 
-  // Relationship
-  leadCompany           LeadCompany @relation(fields: [leadCompanyId], references: [id])
-  leadCompanyId         String
-  responsibleUser       User        @relation(fields: [responsibleUserId], references: [id])
-  responsibleUserId     String
-  responsibleUserTeam   UserTeam    @relation(fields: [responsibleUserTeamId], references: [id])
-  responsibleUserTeamId String
+  firstName  String
+  lastName   String
+  notes      String?
+  linkedIn   String?
+  position   String?
+  department String?
+  phone      String?
+  cellphone  String?
+  origin     String?
 
-  logs Log[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([responsibleUserId])
-  @@index([responsibleUserTeamId])
+  // -- Relationships
+  leadCompany   LeadCompany @relation(fields: [leadCompanyId], references: [id], onDelete: Cascade)
+  leadCompanyId String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  team          Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId        String
+
+  logs       Log[]
+  activities Activity[]
+
+  @@index([userId])
+  @@index([teamId])
   @@map("leads")
 }
 
 model LeadCompany {
-  id                      String   @id @default(cuid())
-  name                    String   @unique
-  cnpj                    String?  @unique
+  id   String  @id @default(cuid())
+  name String  @unique
+  cnpj String? @unique
+
   state                   String?
   city                    String?
   website                 String?
@@ -124,10 +208,11 @@ model LeadCompany {
   segment                 String?
   numberEmployees         Int?
   organizationPipedriveId String?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
 
-  // Relationship
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // -- Relationships
   leads Lead[]
   logs  Log[]
 
@@ -135,24 +220,97 @@ model LeadCompany {
   @@map("leads_companies")
 }
 
-model Log {
-  id        String   @id @default(cuid())
-  action    String
-  createdAt DateTime @default(now())
+model Cadence {
+  id String @id @default(cuid())
 
-  // Relationships
-  user          User?        @relation(fields: [userId], references: [id])
-  userId        String?
-  userTeam      UserTeam     @relation(fields: [userTeamId], references: [id])
-  userTeamId    String
-  lead          Lead?        @relation(fields: [leadId], references: [id])
-  leadId        String?
-  leadCompany   LeadCompany? @relation(fields: [leadCompanyId], references: [id])
-  leadCompanyId String?
+  priority Priority?
+  status   CadenceStatus?
+
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // -- Relationships
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String
+
+  daysOfCadence DayOfCadence[]
+  logs          Log[]
 
   @@index([userId])
-  @@index([userTeamId])
+  @@index([teamId])
+  @@map("cadences")
+}
+
+model DayOfCadence {
+  id String @id @default(cuid())
+
+  day         Int
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // -- Relationships
+  cadence   Cadence @relation(fields: [cadenceId], references: [id], onDelete: Cascade)
+  cadenceId String
+
+  actions Action[]
+  logs    Log[]
+
+  @@index([cadenceId])
+  @@map("days_of_cadency")
+}
+
+model Action {
+  id String @id @default(cuid())
+
+  status     ActionStatus
+  actionType ActionType
+
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // -- Relationships
+  dayOfCadence   DayOfCadence @relation(fields: [dayOfCadenceId], references: [id], onDelete: Cascade)
+  dayOfCadenceId String
+
+  activities Activity[]
+  logs       Log[]
+
+  @@index([dayOfCadenceId])
+  @@map("actions")
+}
+
+model Activity {
+  id String @id @default(cuid())
+
+  status   ActivityStatus @default(PENDING)
+  priority Priority       @default(MEDIUM)
+
+  notes       String?
+  dueDate     DateTime
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // -- Relationships
+  lead     Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId   String
+  action   Action @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  actionId String
+
+  logs Log[]
+
   @@index([leadId])
-  @@index([leadCompanyId])
-  @@map("logs")
+  @@index([actionId])
+  @@map("activities")
 }
