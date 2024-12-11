@@ -64,7 +64,8 @@ CREATE TABLE "leads" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "leadCompanyId" TEXT NOT NULL,
-    "responsibleId" TEXT NOT NULL,
+    "responsibleUserId" TEXT NOT NULL,
+    "responsibleUserTeamId" TEXT NOT NULL,
 
     CONSTRAINT "leads_pkey" PRIMARY KEY ("id")
 );
@@ -113,6 +114,12 @@ CREATE UNIQUE INDEX "users_teams_cnpj_key" ON "users_teams"("cnpj");
 CREATE UNIQUE INDEX "leads_email_key" ON "leads"("email");
 
 -- CreateIndex
+CREATE INDEX "leads_responsibleUserId_idx" ON "leads"("responsibleUserId");
+
+-- CreateIndex
+CREATE INDEX "leads_responsibleUserTeamId_idx" ON "leads"("responsibleUserTeamId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "leads_companies_name_key" ON "leads_companies"("name");
 
 -- CreateIndex
@@ -140,7 +147,10 @@ ALTER TABLE "users" ADD CONSTRAINT "users_userTeamId_fkey" FOREIGN KEY ("userTea
 ALTER TABLE "leads" ADD CONSTRAINT "leads_leadCompanyId_fkey" FOREIGN KEY ("leadCompanyId") REFERENCES "leads_companies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "leads" ADD CONSTRAINT "leads_responsibleId_fkey" FOREIGN KEY ("responsibleId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "leads" ADD CONSTRAINT "leads_responsibleUserId_fkey" FOREIGN KEY ("responsibleUserId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "leads" ADD CONSTRAINT "leads_responsibleUserTeamId_fkey" FOREIGN KEY ("responsibleUserTeamId") REFERENCES "users_teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "logs" ADD CONSTRAINT "logs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

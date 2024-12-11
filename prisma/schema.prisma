@@ -77,6 +77,7 @@ model UserTeam {
   // Relationships
   users User[]
   logs  Log[]
+  Lead  Lead[]
 
   @@map("users_teams")
 }
@@ -98,13 +99,17 @@ model Lead {
   updatedAt          DateTime            @updatedAt
 
   // Relationship
-  leadCompany   LeadCompany @relation(fields: [leadCompanyId], references: [id])
-  leadCompanyId String
-  responsible   User        @relation(fields: [responsibleId], references: [id])
-  responsibleId String
+  leadCompany           LeadCompany @relation(fields: [leadCompanyId], references: [id])
+  leadCompanyId         String
+  responsibleUser       User        @relation(fields: [responsibleUserId], references: [id])
+  responsibleUserId     String
+  responsibleUserTeam   UserTeam    @relation(fields: [responsibleUserTeamId], references: [id])
+  responsibleUserTeamId String
 
   logs Log[]
 
+  @@index([responsibleUserId])
+  @@index([responsibleUserTeamId])
   @@map("leads")
 }
 
