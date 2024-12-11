@@ -24,13 +24,13 @@ CREATE TABLE "users" (
     "gender" "Gender" DEFAULT 'MALE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "teamCompanyId" TEXT NOT NULL,
+    "userTeamId" TEXT NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "team_companies" (
+CREATE TABLE "users_teams" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "cnpj" TEXT NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE "team_companies" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "team_companies_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "users_teams_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -70,7 +70,7 @@ CREATE TABLE "leads" (
 );
 
 -- CreateTable
-CREATE TABLE "lead_companies" (
+CREATE TABLE "leads_companies" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "cnpj" TEXT,
@@ -84,7 +84,7 @@ CREATE TABLE "lead_companies" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "lead_companies_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "leads_companies_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -93,7 +93,7 @@ CREATE TABLE "logs" (
     "action" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" TEXT,
-    "teamCompanyId" TEXT,
+    "userTeamId" TEXT NOT NULL,
     "leadId" TEXT,
     "leadCompanyId" TEXT,
 
@@ -104,28 +104,28 @@ CREATE TABLE "logs" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "team_companies_name_key" ON "team_companies"("name");
+CREATE UNIQUE INDEX "users_teams_name_key" ON "users_teams"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "team_companies_cnpj_key" ON "team_companies"("cnpj");
+CREATE UNIQUE INDEX "users_teams_cnpj_key" ON "users_teams"("cnpj");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "leads_email_key" ON "leads"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "lead_companies_name_key" ON "lead_companies"("name");
+CREATE UNIQUE INDEX "leads_companies_name_key" ON "leads_companies"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "lead_companies_cnpj_key" ON "lead_companies"("cnpj");
+CREATE UNIQUE INDEX "leads_companies_cnpj_key" ON "leads_companies"("cnpj");
 
 -- CreateIndex
-CREATE INDEX "lead_companies_name_idx" ON "lead_companies"("name");
+CREATE INDEX "leads_companies_name_idx" ON "leads_companies"("name");
 
 -- CreateIndex
 CREATE INDEX "logs_userId_idx" ON "logs"("userId");
 
 -- CreateIndex
-CREATE INDEX "logs_teamCompanyId_idx" ON "logs"("teamCompanyId");
+CREATE INDEX "logs_userTeamId_idx" ON "logs"("userTeamId");
 
 -- CreateIndex
 CREATE INDEX "logs_leadId_idx" ON "logs"("leadId");
@@ -134,10 +134,10 @@ CREATE INDEX "logs_leadId_idx" ON "logs"("leadId");
 CREATE INDEX "logs_leadCompanyId_idx" ON "logs"("leadCompanyId");
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_teamCompanyId_fkey" FOREIGN KEY ("teamCompanyId") REFERENCES "team_companies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_userTeamId_fkey" FOREIGN KEY ("userTeamId") REFERENCES "users_teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "leads" ADD CONSTRAINT "leads_leadCompanyId_fkey" FOREIGN KEY ("leadCompanyId") REFERENCES "lead_companies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "leads" ADD CONSTRAINT "leads_leadCompanyId_fkey" FOREIGN KEY ("leadCompanyId") REFERENCES "leads_companies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "leads" ADD CONSTRAINT "leads_responsibleId_fkey" FOREIGN KEY ("responsibleId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -146,10 +146,10 @@ ALTER TABLE "leads" ADD CONSTRAINT "leads_responsibleId_fkey" FOREIGN KEY ("resp
 ALTER TABLE "logs" ADD CONSTRAINT "logs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "logs" ADD CONSTRAINT "logs_teamCompanyId_fkey" FOREIGN KEY ("teamCompanyId") REFERENCES "team_companies"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "logs" ADD CONSTRAINT "logs_userTeamId_fkey" FOREIGN KEY ("userTeamId") REFERENCES "users_teams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "logs" ADD CONSTRAINT "logs_leadId_fkey" FOREIGN KEY ("leadId") REFERENCES "leads"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "logs" ADD CONSTRAINT "logs_leadCompanyId_fkey" FOREIGN KEY ("leadCompanyId") REFERENCES "lead_companies"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "logs" ADD CONSTRAINT "logs_leadCompanyId_fkey" FOREIGN KEY ("leadCompanyId") REFERENCES "leads_companies"("id") ON DELETE SET NULL ON UPDATE CASCADE;

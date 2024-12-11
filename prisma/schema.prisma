@@ -25,6 +25,7 @@ enum Status {
   INACTIVE
 }
 
+// Trocar para uma tabela
 enum AcquisitionChannel {
   OUTBOUND
   INBOUND
@@ -36,60 +37,53 @@ enum AcquisitionChannel {
 
 // Models
 model User {
-  id           String @id @default(cuid())
-  email        String @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   passwordHash String
-
-  role   Role   @default(TEAM_MEMBER)
-  status Status @default(ACTIVE)
-
-  firstName String
-  lastName  String
-  dateBirth DateTime?
-  picture   String?
-  gender    Gender?   @default(MALE)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role         Role      @default(TEAM_MEMBER)
+  status       Status    @default(ACTIVE)
+  firstName    String
+  lastName     String
+  dateBirth    DateTime?
+  picture      String?
+  gender       Gender?   @default(MALE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   // Relationships
-  teamCompany   TeamCompany @relation(fields: [teamCompanyId], references: [id])
-  teamCompanyId String
+  userTeam   UserTeam @relation(fields: [userTeamId], references: [id])
+  userTeamId String
 
-  Log  Log[]
-  Lead Lead[]
+  logs  Log[]
+  leads Lead[]
 
   @@map("users")
 }
 
-model TeamCompany {
-  id   String @id @default(cuid())
-  name String @unique
-  cnpj String @unique
-
-  status Status @default(ACTIVE)
-
+model UserTeam {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  cnpj            String   @unique
+  status          Status   @default(ACTIVE)
   state           String?
   city            String?
   website         String?
   linkedIn        String?
   segment         String?
   pipedriveApiKey String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relationships
-  User User[]
-  Log  Log[]
+  users User[]
+  logs  Log[]
 
-  @@map("team_companies")
+  @@map("users_teams")
 }
 
 model Lead {
-  id    String  @id @default(cuid())
-  email String? @unique
-
+  id                 String              @id @default(cuid())
+  email              String?             @unique
   firstName          String
   lastName           String
   notes              String?
@@ -100,27 +94,24 @@ model Lead {
   cellphone          String?
   origin             String?
   acquisitionChannel AcquisitionChannel?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
   // Relationship
   leadCompany   LeadCompany @relation(fields: [leadCompanyId], references: [id])
   leadCompanyId String
-
-  responsible   User   @relation(fields: [responsibleId], references: [id])
+  responsible   User        @relation(fields: [responsibleId], references: [id])
   responsibleId String
 
-  Log Log[]
+  logs Log[]
 
   @@map("leads")
 }
 
 model LeadCompany {
-  id   String  @id @default(cuid())
-  name String  @unique
-  cnpj String? @unique
-
+  id                      String   @id @default(cuid())
+  name                    String   @unique
+  cnpj                    String?  @unique
   state                   String?
   city                    String?
   website                 String?
@@ -128,39 +119,34 @@ model LeadCompany {
   segment                 String?
   numberEmployees         Int?
   organizationPipedriveId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   // Relationship
-  Lead Lead[]
-  Log  Log[]
+  leads Lead[]
+  logs  Log[]
 
   @@index([name])
-  @@map("lead_companies")
+  @@map("leads_companies")
 }
 
 model Log {
-  id String @id @default(cuid())
-
+  id        String   @id @default(cuid())
   action    String
   createdAt DateTime @default(now())
 
   // Relationships
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
-
-  teamCompany   TeamCompany? @relation(fields: [teamCompanyId], references: [id])
-  teamCompanyId String?
-
-  lead   Lead?   @relation(fields: [leadId], references: [id])
-  leadId String?
-
+  user          User?        @relation(fields: [userId], references: [id])
+  userId        String?
+  userTeam      UserTeam     @relation(fields: [userTeamId], references: [id])
+  userTeamId    String
+  lead          Lead?        @relation(fields: [leadId], references: [id])
+  leadId        String?
   leadCompany   LeadCompany? @relation(fields: [leadCompanyId], references: [id])
   leadCompanyId String?
 
   @@index([userId])
-  @@index([teamCompanyId])
+  @@index([userTeamId])
   @@index([leadId])
   @@index([leadCompanyId])
   @@map("logs")
